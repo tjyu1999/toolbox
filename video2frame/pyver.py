@@ -10,13 +10,13 @@ def download_video(url, q, vdir):
     ydl_opts = {
         'format': f'bestvideo[height <= {q}] + bestaudio/best[height <= {q}]',
         'merge_output_format': 'mp4',
-        'outtmpl': os.path.join(vdir, f'{vdir}.mp4')
+        'outtmpl': os.path.join(vdir, f'{vdir}_{q}.mp4')
     }
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
             
-    return os.path.join(vdir, f'{vdir}.mp4')
+    return os.path.join(vdir, f'{vdir}_{q}.mp4')
 
 def extract_frames(vdir, fdir):
     clip = VideoFileClip(vdir)
