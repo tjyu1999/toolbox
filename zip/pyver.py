@@ -1,43 +1,59 @@
 import os
 import sys
+from datetime import datetime
 import requests as req
+from tqdm import tqdm
+import time
 import zipfile
 
-def dnld(url, fname):
+def download_file(url, fdir, fname):
     r = req.get(url, stream=True)
     size = int(r.headers.get('content-length', 0))
-    curr_size = 0
-    bar_length = 150
-
-    with open(fname, 'wb') as file:
-        print("Progress: [  0%] []", end="\r")
-        
+    
+    size_in_mb = size / (1024 * 1024)
+    print(f"[info] {fname} {size_in_mb: .2f}MB")
+    print(f"[download] Destination: {os.getcwd()}/{fname}")
+    
+    start_time = time.time()
+    with open(fname, 'wb') as file, tqdm(total=size, unit='B', unit_scale=True, desc="[download] Downloading file") as pbar:
         for data in r.iter_content(chunk_size=1024):
             file.write(data)
-            curr_size += len(data)
-            
-            pctg = (curr_size / size) * 100
-            bar = '#' * int(pctg / (100 / bar_length)) + '.' * (bar_length - int(pctg / (100 / bar_length)))
-            print(f"Progress: [{pctg:3.0f}%] [{bar}]", end="\r")
-            
-    print("\n")
-
-def extr(fname, dst):
-    if not os.path.exists(dst):
-        os.mkdir(dst)
+            pbar.update(len(data))
     
-    with zipfile.ZipFile(fname, 'r') as ref:
-        ref.extractall(dst)
+    download_time = time.time() - start_time
+    format_time = time.strftime("%H:%M:%S", time.gmtime(download_time))
+    download_mbps = size_in_mb / download_time
+    print(f"[download] 100% of {size_in_mb: .2f}MB in {format_time} at {download_mbps:.2f}MB/s")
 
-if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("The command should be \"python3 pyver.py {URL} {FILENAME}\"")
+def extract_file(fname, fdir):
+    with zipfile.ZipFile(fname, 'r') as ref:
+        size = sum(len(ref.read(name)) for name in ref.namelist())
+    
+    size_in_mb = size / (1024 * 1024)
+    print(f"[extract] Destination: {os.getcwd()}/{fdir}")
+    
+    start_time = time.time()
+    with zipfile.ZipFile(fname, 'r') as ref:
+        ref.extractall(fdir)
+    
+    extract_time = time.time() - start_time
+    format_time = time.strftime("%H:%M:%S", time.gmtime(extract_time))
+    extract_mbps = size_in_mb / extract_time
+    print(f"[info] {os.getcwd()}/{fdir} {os.listdir(fdir)}")
+    print(f"[extract] 100% of {size_in_mb: .2f}MB in {format_time} at {extract_mbps:.2f}MB/s")
+
+def main():
+    if len(sys.argv) < 2:
         sys.exit(1)
     
     url = sys.argv[1]
-    fname = sys.argv[2] + ".zip"
-    dst = sys.argv[2]
-    dnld(url, fname)
-    extr(fname, dst)
-  
-    print("Download and extraction are completed.")
+    fdir = datetime.now().strftime("%d%H%M%S")
+    fname = f"{fdir}.zip"
+    if not os.path.exists(fdir):
+        os.makedirs(fdir)
+    
+    download_file(url, fdir, fname)
+    extract_file(fname, fdir)
+
+if __name__ == "__main__":
+    main()
