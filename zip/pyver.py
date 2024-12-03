@@ -31,7 +31,7 @@ def extr(fname, dst):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("The command should be \"python3 pyver.py {url} {fname}\"")
+        print("The command should be \"python3 pyver.py {URL} {FILENAME}\"")
         sys.exit(1)
     
     url = sys.argv[1]
