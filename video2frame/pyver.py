@@ -1,6 +1,7 @@
 import os
 import sys
 from datetime import datetime
+import time
 import yt_dlp
 from moviepy import VideoFileClip
 from PIL import Image
@@ -15,13 +16,14 @@ def download_video(url, q, vdir):
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
-            
+    
     return os.path.join(vdir, f'{vdir}_{q}.mp4')
 
 def extract_frames(vdir, fdir):
     clip = VideoFileClip(vdir)
     frame_count = int(clip.fps * clip.duration)
-        
+    
+    start_time = time.time()
     with tqdm(total=frame_count, desc="[clip] Extracting frames", unit="frame") as pbar:
         for i in range(frame_count):
             frame = clip.get_frame(i / clip.fps)
@@ -31,7 +33,12 @@ def extract_frames(vdir, fdir):
             pbar.update(1)
     
         clip.close()
-
+        
+    extract_time = time.time() - start_time
+    format_time = time.strftime("%H:%M:%S", time.gmtime(extract_time))
+    extract_speed = frame_count / extract_time
+    print(f"[extract] 100% of {frame_count} frames extracted in {format_time} at {extract_speed:.2f}frame/s")
+    
 def main():
     if len(sys.argv) < 2:
         sys.exit(1)
