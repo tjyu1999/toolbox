@@ -47,7 +47,7 @@ def main():
         sys.exit(1)
     
     url = sys.argv[1]
-    fdir = datetime.now().strftime("%d%H%M%S")
+    fdir = os.path.join("download", datetime.now().strftime("%d%H%M%S"))
     fname = f"{fdir}.zip"
     if not os.path.exists(fdir):
         os.makedirs(fdir)
