@@ -73,15 +73,16 @@ class Program {
     }
 
     static async Task Main(string[] args) {
-        if (args.Length < 1) {
-            Console.WriteLine("Usage: <url>");
+        if (args.Length < 1)
             return;
-        }
 
         string url = args[0];
-        string fname = $"{DateTime.Now:ddHHmmss}.zip";
-        string fdir = $"{DateTime.Now:ddHHmmss}";
-
+        string fdir = Path.Combine("../download", DateTime.Now.ToString("ddHHmmss"));
+        string fname = Path.Combine("../download", $"{DateTime.Now:ddHHmmss}.zip");
+        
+        if (!Directory.Exists(fdir))
+            Directory.CreateDirectory(fdir);
+        
         await DownloadFile(url, fname);
         ExtractFile(fname, fdir);
     }
