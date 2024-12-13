@@ -42,19 +42,17 @@ class Program {
     }
 
     static void ExtractFile(string fname, string fdir) {
-        if (!Directory.Exists(fdir)) {
+        if (!Directory.Exists(fdir))
             Directory.CreateDirectory(fdir);
-        }
 
         Console.WriteLine($"[extract] Destination: {Directory.GetCurrentDirectory()}/{fdir}");
-
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         using (ZipArchive archive = ZipFile.OpenRead(fname)) {
             long totalSize = 0;
-            foreach (var entry in archive.Entries) {
+            foreach (var entry in archive.Entries)
                 totalSize += entry.Length;
-            }
+            
             double sizeInMB = totalSize / (1024.0 * 1024.0);
 
             foreach (var entry in archive.Entries) {
